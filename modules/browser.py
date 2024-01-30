@@ -438,7 +438,7 @@ class Browser:
         captcha_response = self.solve_2captcha()
 
         payload = {"address": address}
-        url = f'https://artio-80085-ts-faucet-api-2.berachain.com/api/claim?address={address}'
+        url = f'https://artio-80085-faucet-api-recaptcha.berachain.com/api/claim?address={address}'
         self.session.headers.update({
             'Authorization': f'Bearer {captcha_response}',
             'Origin': 'https://artio.faucet.berachain.com',
@@ -448,8 +448,8 @@ class Browser:
         r = self.session.post(url, json=payload)
         del self.session.headers['Authorization']
 
-        if r.status_code == 200 and r.json().get('message'):
-            logger.success(f'[+] Faucet | BERA tokens requested')
+        if r.status_code == 200 and r.json().get('msg'):
+            logger.success(f'[+] Faucet | BERA tokens requested: {r.json()["msg"]}')
         elif 'You have exceeded the rate limit' in r.text:
             raise Exception(f'[-] Faucet | {r.text.strip()}')
         elif '503 Service Temporarily Unavailable' in r.text:
