@@ -336,7 +336,11 @@ class Browser:
         }
         r = self.session.post('https://graphigo.prd.galaxy.eco/query', json=payload)
 
-        if r.json() == {"data": {"sendVerificationCode": None}}:
+        if 'failed to verify recaptcha token' in r.text:
+            logger.warning(f'[-] Galxe | Outdated `w` token! Dont stop this soft, just change it in `w.txt`')
+            sleep(10)
+            return self.send_email(email=email)
+        elif r.json() == {"data": {"sendVerificationCode": None}}:
             return True
         else:
             logger.warning(f'[-] Galxe | Cannot send email from Galxe to {email} error: {r.text}')
@@ -384,7 +388,12 @@ class Browser:
             "query": "mutation AddTypedCredentialItems($input: MutateTypedCredItemInput!) {\n  typedCredentialItems(input: $input) {\n    id\n    __typename\n  }\n}\n"
         }
         r = self.session.post('https://graphigo.prd.galaxy.eco/query', json=payload)
-        if r.json() != {"data": {"typedCredentialItems": {"id": "367886459336302592","__typename": "Cred"}}}:
+
+        if 'failed to verify recaptcha token' in r.text:
+            logger.warning(f'[-] Galxe | Outdated `w` token! Dont stop this soft, just change it in `w.txt`')
+            sleep(10)
+            return self.open_faucet()
+        elif r.json() != {"data": {"typedCredentialItems": {"id": "367886459336302592","__typename": "Cred"}}}:
             logger.warning(f'Cant open faucet quest on Galxe')
             sleep(10)
             return self.open_faucet()

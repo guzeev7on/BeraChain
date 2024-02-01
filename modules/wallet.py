@@ -175,6 +175,9 @@ class Wallet:
         if only_more: logger.debug(f'[•] Web3 | Waiting for balance more than {round(needed_balance, 6)} {token_name} in {chain_name.upper()}')
         else: logger.debug(f'[•] Web3 | Waiting for {round(needed_balance, 6)} {token_name} balance in {chain_name.upper()}')
 
+        timer = 0
+        if token_name == 'BERA': time_to_wait = settings.TO_WAIT_BALANCE_FAUCET
+        else: time_to_wait = settings.TO_WAIT_BALANCE
         while True:
             try:
                 new_balance = self.get_balance(chain_name=chain_name, human=True, token_address=token_address)
@@ -184,10 +187,20 @@ class Wallet:
                 if status:
                     logger.debug(f'[•] Web3 | New balance: {round(new_balance, 6)} {token_name}\n')
                     return new_balance
-                sleep(5)
+                elif timer < time_to_wait * 60:
+                    timer += 5
+                    sleep(5)
+                else:
+                    logger.warning(f'[-] Web3 | Balance not updated in {time_to_wait} minutes')
+                    return 'not updated'
             except Exception as err:
                 logger.warning(f'[•] Web3 | Wait balance error: {err}')
-                sleep(10)
+                if timer < time_to_wait * 60:
+                    timer += 5
+                    sleep(5)
+                else:
+                    logger.warning(f'[-] Web3 | Balance not updated in {time_to_wait} minutes')
+                    return 'not updated'
 
 
     def get_signature_for_galxe_login(self):

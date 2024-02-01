@@ -9,7 +9,8 @@ def berachain_onchain(wallet: Wallet):
 
     if wallet.get_balance(chain_name='berachain') == 0:
         wallet.browser.request_faucet(address=wallet.address) # try to address.lower()
-        wallet.wait_balance(chain_name='berachain', needed_balance=0, only_more=True)
+        if wallet.wait_balance(chain_name='berachain', needed_balance=0, only_more=True) != 'not updated':
+            raise Exception(f'[-] Web3 | Tokens not arrived from Faucet')
 
     Bex(wallet=wallet) # BERA -> stgUSDC
     sleeping(10, 20) # задержка между свапами
